@@ -7,6 +7,8 @@ How to use llama-server for embeddings and similarity score
 - extract the `.zip` file in the sub-folder `llama.cpp` (if you cloned the repo you will already find it there)
 - Download your GGUF files (LLM or embeddings)in the sub-folder `llama.cpp\models` (if you cloned the repo you will already find it there)
 
+> for my tests I used `e5-small-v2.Q8_0.gguf` as embeddings model
+
 ## Dependencies
 ```
 pip install openai streamlit tiktoken sentence-transformers pillow
