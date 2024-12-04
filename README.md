@@ -14,6 +14,101 @@ How to use llama-server for embeddings and similarity score
 pip install openai streamlit tiktoken sentence-transformers pillow
 ```
 
+---
+
+> 2024-12-03
+
+## with Streamlit
+create a batch file with the following lines (something like `runservers.bat`
+```
+start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\gte-small_fp16.gguf -c 1024 --port 8002
+start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
+PAUSE
+```
+- this will open a server instance in 2 different windows
+
+- clone the repo
+- run from the temrinal with the venv activated:
+```
+streamlit run .\04.st_semanticPROMPT.py
+```
+>  You can now view your Streamlit app in your browser.
+>
+>  Local URL: http://localhost:8501
+>  Network URL: http://172.16.19.83:8501
+
+#### Work in progress
+For now I am only computing the similarity.
+
+Next steps:
+- check if the prompt is about summarization, list of topics
+- check if RAG is required (there is a toggle)
+- if no RAG required, LLM is called for the reply
+- if RAG is required,
+  - check if the context or query is empty
+  - compute similarity score
+  - if cosine similarity >= 0.77 call the LLM and compute confidence score between prompt and reply
+  - ELSE throw a message (UNANSWERABLE, I DON'T KNOW, MISSING data)
+
+### Details
+two endpoints on different PORTS are running so we need to client connections:
+```python
+llm = OpenAI(base_url="http://localhost:8001/v1", api_key="not-needed", organization='SelectedModel')
+embeddings = OpenAI(base_url="http://localhost:8002/v1", api_key="not-needed")
+```
+Cosine Similarity is computed with `sentence-transformers` and the embedded texts (query,context) are passed to the function:
+```python
+def embed_QUERY(question,context,client):
+    print("Create embeddings for 2 different texts and than compute similarity serach")
+    print("Calling API endpoint for the 2 embeddings...")
+    messages = [question,context]
+    embedded = client.embeddings.create(
+                            model="",
+                            input=messages,
+                            encoding_format="float"
+                         )
+    hits = pytorch_cos_sim(embedded.data[0].embedding, embedded.data[1].embedding)
+    return hits
+```
+The function compute first  a list with two embedded documents, and then calculate the cosine similarity
+
+the retrned value is a tensor type so later we need to extract it
+```python
+results.markdown(f'Similarity score: **{res[0][0]:.5f}**')
+```
+
+
+#### Footnotes on Streanlit
+Other possible similarity scores:
+For some reasons are giving back the same numners...
+```python         
+# compute similarity (3 methods)
+from sentence_transformers.util import pytorch_cos_sim, cos_sim, dot_score
+print('1 > pytorch_cos_sim...')
+hits = pytorch_cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
+print(hits)
+print('2 > cos_sim...')
+hits = cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
+print(hits)
+print('3 > dot_score...')
+hits = dot_score(message1_em.data[0].embedding, message2_em.data[0].embedding)
+print(hits)
+```
+                        
+#### Additional notes
+```
+# a good threshold above 0.77  AnneFrank scores with China text 0.7258
+# pollution question scores 0.7822  China and India scores 0.7980
+# artificial intelligence scores 0.7488, what is science scores 0.7382
+# advantages of chinese system 0.8242   
+```
+- `@st.cache_resource` does not work with OpenAI client instantiation
+- `@st.cache_resource` cannot call another function under st.cache (for ecample `embed_QUERY(question,context,client)`)
+
+
+---
+> 2024-12-03
+
 ## Usage
 From the main project directory
 - in one terminal window run
