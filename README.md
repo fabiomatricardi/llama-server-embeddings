@@ -9,6 +9,12 @@ How to use llama-server for embeddings and similarity score
 
 > for my tests I used `e5-small-v2.Q8_0.gguf` as embeddings model
 
+##### OpenAI API specifications
+Check them [HERE](https://platform.openai.com/docs/api-reference/embeddings/object)
+
+##### A story of Llama.cpp
+[An amazing blog-journal](https://steelph0enix.github.io/posts/llama-cpp-guide/)
+
 ## Dependencies
 ```
 pip install openai streamlit tiktoken sentence-transformers pillow
