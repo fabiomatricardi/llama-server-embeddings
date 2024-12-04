@@ -18,6 +18,9 @@ pip install openai streamlit tiktoken sentence-transformers pillow
 
 > 2024-12-03
 
+
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/stapp-sofar.png' width=900>
+
 ## with Streamlit
 create a batch file with the following lines (something like `runservers.bat`
 ```
@@ -26,6 +29,7 @@ start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicu
 PAUSE
 ```
 - this will open a server instance in 2 different windows
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/tri-windows.png' width=900>
 
 - clone the repo
 - run from the temrinal with the venv activated:
@@ -80,7 +84,7 @@ results.markdown(f'Similarity score: **{res[0][0]:.5f}**')
 
 #### Footnotes on Streanlit
 Other possible similarity scores:
-For some reasons are giving back the same numners...
+For some reasons are giving back the same numbers...
 ```python         
 # compute similarity (3 methods)
 from sentence_transformers.util import pytorch_cos_sim, cos_sim, dot_score
@@ -103,7 +107,7 @@ print(hits)
 # advantages of chinese system 0.8242   
 ```
 - `@st.cache_resource` does not work with OpenAI client instantiation
-- `@st.cache_resource` cannot call another function under st.cache (for ecample `embed_QUERY(question,context,client)`)
+- `@st.cache_resource` cannot call another function under st.cache (for example `embed_QUERY(question,context,client)`)
 
 
 ---
