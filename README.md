@@ -2,7 +2,9 @@
 
 # llama-server-embeddings
 ##### How to use llama-server for embeddings and similarity score
-This app intent is to use embeddings and similarity score to FORCE the SML to say 
+This app intent is to use embeddings and similarity score to FORCE the SML to say "I DON'T KNOW'
+
+The trick here is to take a threshold in the cosine similarity: whatever is below the set-point is too far from the context, so it cannot be answered; everything else is treated as a normal RAG.
 
 ## what you need
 - Download binareies of llama.cpp directly from the pre-compiled releases, according to your architecture
@@ -55,13 +57,14 @@ For now I am only computing the similarity.
 
 Next steps:
 - check if the prompt is about summarization, list of topics
-- check if RAG is required (there is a toggle)
-- if no RAG required, LLM is called for the reply
-- if RAG is required,
-  - check if the context or query is empty
-  - compute similarity score
-  - if cosine similarity >= 0.77 call the LLM and compute confidence score between prompt and reply
-  - ELSE throw a message (UNANSWERABLE, I DON'T KNOW, MISSING data)
+- [x] check if RAG is required (there is a toggle)
+- [x] if no RAG required, LLM is called for the reply
+- [x] if RAG is required,
+  - [ ] check if the context or query is empty
+  - [x] compute similarity score
+  - [x] if cosine similarity >= 0.77 call the LLM and
+  - [ ] compute confidence score between prompt and reply
+  - [x] ELSE throw a message (UNANSWERABLE, I DON'T KNOW, MISSING data)
 
 ### Details
 two endpoints on different PORTS are running so we need to client connections:
