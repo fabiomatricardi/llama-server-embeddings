@@ -1,6 +1,8 @@
-# llama-server-embeddings
-How to use llama-server for embeddings and similarity score
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/truthGPT_example.png' width=800>
 
+# llama-server-embeddings
+##### How to use llama-server for embeddings and similarity score
+This app intent is to use embeddings and similarity score to FORCE the SML to say 
 
 ## what you need
 - Download binareies of llama.cpp directly from the pre-compiled releases, according to your architecture
@@ -25,13 +27,12 @@ pip install openai streamlit tiktoken sentence-transformers pillow
 > 2024-12-03
 
 
-<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/stapp-sofar.png' width=900>
 
 ## with Streamlit
 create a batch file with the following lines (something like `runservers.bat`
 ```
 start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\gte-small_fp16.gguf -c 1024 --port 8002
-start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
+start .\llama.cpp\llama-server.exe -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
 PAUSE
 ```
 - this will open a server instance in 2 different windows
@@ -46,6 +47,8 @@ streamlit run .\04.st_semanticPROMPT.py
 >
 >  Local URL: http://localhost:8501
 >  Network URL: http://172.16.19.83:8501
+
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/20241209-semBAD.png' width=400><img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/20241209-semOK.png' width=400>
 
 #### Work in progress
 For now I am only computing the similarity.
