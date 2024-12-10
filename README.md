@@ -212,3 +212,6 @@ It could soon be the case that the so-called developing countries will be showin
 ```
 
 
+#### Streamlit base tutorial for chatbots
+tutorial [here](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps#build-a-simple-chatbot-gui-with-streaming)
+
