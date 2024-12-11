@@ -218,7 +218,7 @@ tutorial [here](https://docs.streamlit.io/develop/tutorials/llms/build-conversat
 
 ---
 
-# rev 044
+# rev 044 - using smollm2-360m-instruct-q8_0.gguf
 Add 3 different embedding models
 > noted that every model gives quite different cosine_similarity
 > this is a problem to decide the threshold
@@ -254,6 +254,8 @@ from the terminal, with `venv` activated run
 streamlit run .\044.st_semanticPROMPT.py
 ```
 
+
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/ample-images/2024-12-11%2018%2037%2038.png' width=900>
 
 
 
