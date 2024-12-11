@@ -41,6 +41,15 @@ embeddingname = 'e5-small-v2_fp16.gguf'
 if "firstrun" not in st.session_state:
     st.session_state.firstrun = 0
 
+if "simscore_1" not in st.session_state:
+    st.session_state.simscore_1 = 0.0    
+if "simscore_2" not in st.session_state:
+    st.session_state.simscore_2 = 0.0 
+if "confscore_1" not in st.session_state:
+    st.session_state.confscore_1 = 0.0 
+if "confscore_2" not in st.session_state:
+    st.session_state.confscore_2 = 0.0 
+
 standard1 = """One of the things everybody in the West knows about China is that it is not a democracy, and is instead a regime run with an iron fist by a single entity, the Chinese Communist Party, whose leadership rarely acts transparently, running the country without the need for primary elections, alternative candidacies, etc.
 In general, those of us who live in democracies, with relatively transparent electoral processes, tend to consider the Chinese system undesirable, little more than a dictatorship where people have no say in who governs them.
 That said, among the “advantages” of the Chinese system is that because the leadership never has to put its legitimacy to the vote, it can carry out very long-term planning in the knowledge that another administration isn’t going to come along and change those plans.
@@ -86,8 +95,9 @@ def embed_QUERY(question,context,client):
 
 
 llm = OpenAI(base_url="http://localhost:8001/v1", api_key="not-needed", organization='SelectedModel')
-embeddings = OpenAI(base_url="http://localhost:8002/v1", api_key="not-needed")
-
+embeddings = OpenAI(base_url="http://localhost:8002/v1", api_key="not-needed")   #e5-small-v2_fp16.gguf
+embeddings2 = OpenAI(base_url="http://localhost:8003/v1", api_key="not-needed")  #all-MiniLM-L12-v2.Q8_0.gguf
+embeddings3 = OpenAI(base_url="http://localhost:8004/v1", api_key="not-needed")  #gte-small_fp16.gguf
 with st.container():
     col1, col2 =  st.columns([0.6,0.4])
     with col1:
@@ -105,7 +115,9 @@ Otherwise the embeddings with treshold 0.77 will cut off the user request and gi
         with st.container(border=True):
             status = st.markdown('STATUS MESSAGES:   none')
         with st.container(border=True):
-            results = st.markdown(f'Similarity score: ')
+            results = st.markdown(f'Similarity score e5-small: ')
+            mySimscore1 = st.markdown(f'Similarity score allMiniLM: ')
+            mySimscore3 = st.markdown(f'Similarity score gte-small: ')
         rag_required = st.toggle(label='Required RAG')
 
 if st.session_state.firstrun == 0:
@@ -169,13 +181,31 @@ if btn_inference:
             status.markdown('STATUS MESSAGES:   checking the query relevance with the context...') 
             res = embed_QUERY(user_input,user_context,embeddings)
             simscore = float(res[0][0])
+            results.markdown(f'Similarity score e5: *{simscore:.5f}*')
+            res2 = embed_QUERY(user_input,user_context,embeddings2)
+            simscore2 = float(res2[0][0])
+            mySimscore1.markdown(f'Similarity score allMiniLM: *{simscore2:.5f}*')
+            res3 = embed_QUERY(user_input,user_context,embeddings3)
+            simscore3 = float(res3[0][0])
+            mySimscore3.markdown(f'Similarity score gte-small: *{simscore3:.5f}*')
             if simscore>=0.7760:
                 sleep(2)
                 status.markdown('STATUS MESSAGES:   relevance Score Cosine threshold >= 0.7760...')
                 sleep(1)
                 status.markdown('STATUS MESSAGES:   Query and context relevant Question is **:green[answerable...]**')
-                results.markdown(f'Similarity score: **:green[{simscore:.5f}]**')
-                sleep(1)
+                results.markdown(f'Similarity score e5: **:green[{simscore:.5f}]**')
+                if simscore2>=0.7760:
+                    mySimscore1.markdown(f'Similarity score allMiniLM: **:green[{simscore2:.5f}]**')
+                    sleep(1)
+                else:
+                    mySimscore1.markdown(f'Similarity score allMiniLM: **:red[{simscore2:.5f}]**')
+                    sleep(1)                    
+                if simscore3>=0.7760:
+                    mySimscore3.markdown(f'Similarity score gte-small: **:green[{simscore3:.5f}]**')
+                    sleep(1)
+                else:
+                    mySimscore3.markdown(f'Similarity score gte-small: **:red[{simscore3:.5f}]**')
+                    sleep(1)                 
                 status.markdown('STATUS MESSAGES:   **:green[Generating reply...]**')
                 prompt = f"""Reply to the question only using the provided context.
 [context]{user_context}[end of context]
@@ -197,9 +227,14 @@ ASSISTANT:"""
                     if chunk.choices[0].delta.content:
                         full_response += chunk.choices[0].delta.content
                         reply.markdown(full_response + cursor)
+                # COMPUTE 3 cosine similarity for comparison
                 conf_score = embed_QUERY(prompt,full_response,embeddings) 
                 CONFscore = float(conf_score[0][0])       
-                reply.markdown(full_response+f'\n\n Confidence score: **:green[{CONFscore:.5f}]**')
+                conf_score2 = embed_QUERY(prompt,full_response,embeddings2) 
+                CONFscore2 = float(conf_score2[0][0])    
+                conf_score3 = embed_QUERY(prompt,full_response,embeddings3) 
+                CONFscore3 = float(conf_score3[0][0]) 
+                reply.markdown(full_response+f'\n\n Confidence score: **:green[{CONFscore:.5f}]** \n\n Inconfidence score: **{CONFscore2:.5f}** \n\n gte-small score: **{CONFscore3:.5f}**')
 
             else:
                 sleep(2)
