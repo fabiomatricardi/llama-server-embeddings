@@ -1,12 +1,14 @@
 # Let's test a semantic evaluator to force a SML to say I DON'T KNOW
-# here using pure llama.cpp server with llama-server.exe -m .\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
+# here using pure llama.cpp server with llama-server.exe -m .\models\smollm2-360m-instruct-q8_0.gguf -c 2048 --port 8001
 import streamlit as st
-# mTinyVicuna1Bain: server is listening on http://127.0.0.1:8001 
-# embeddings: server is listening on http://127.0.0.1:8002 
+# smollm2-360m-instruct-q8_0.gguf main: server is listening on http://127.0.0.1:8001 
+# embeddings: server is listening on http://127.0.0.1:8002 /8003/8804
 #
 # You can use the following commands - they will open a server instance in 2 different windows
-# start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\gte-small_fp16.gguf -c 1024 --port 8002
-# start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
+# start .\llama.cpp\llama-server.exe -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\smollm2-360m-instruct-q8_0.gguf -c 4096 --port 8001
+# start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\e5-small-v2_fp16.gguf -c 1024 --port 8002
+# start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\all-MiniLM-L12-v2.Q8_0.gguf -c 1024 --port 8003
+# start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\gte-small_fp16.gguf -c 1024 --port 8004
 # PAUSE
 #
 
