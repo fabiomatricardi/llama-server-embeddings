@@ -215,3 +215,48 @@ It could soon be the case that the so-called developing countries will be showin
 #### Streamlit base tutorial for chatbots
 tutorial [here](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps#build-a-simple-chatbot-gui-with-streaming)
 
+
+---
+
+# rev 044
+Add 3 different embedding models
+> noted that every model gives quite different cosine_similarity
+> this is a problem to decide the threshold
+> -
+> gte-small is less inclusive than e5-small, but both are GOOD
+> -
+> all-MiniLM-V12 not easy
+
+
+#### the batch file
+```batch
+echo e5-small-v2_fp16.gguf -c 1024 --port 8002
+echo all-MiniLM-L12-v2.Q8_0.gguf -c 1024 --port 8003
+echo gte-small_fp16.gguf -c 1024 --port 8004
+echo model smollm2-360m-instruct-q8_0.gguf -c 2048 --port 8001
+
+start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\e5-small-v2_fp16.gguf -c 1024 --port 8002
+
+start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\all-MiniLM-L12-v2.Q8_0.gguf -c 1024 --port 8003
+
+start .\llama.cpp\llama-server.exe --embeddings -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\gte-small_fp16.gguf -c 1024 --port 8004
+
+start .\llama.cpp\llama-server.exe -m C:\Users\FabioMatricardi\Documents\DEV\PortableLLMS\TruthGPT\llama.cpp\models\smollm2-360m-instruct-q8_0.gguf -c 4096 --port 8001
+
+
+PAUSE
+
+```
+
+### how to run
+from the terminal, with `venv` activated run
+```
+streamlit run .\044.st_semanticPROMPT.py
+```
+
+
+
+
+
+
+
