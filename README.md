@@ -99,8 +99,11 @@ the retrned value is a tensor type so later we need to extract it
 results.markdown(f'Similarity score: **{res:.5f}**')
 ```
 
+<img src='https://github.com/fabiomatricardi/llama-server-embeddings/raw/main/workflow.png' width=800>
 
-#### Footnotes on Streanlit
+
+
+#### Footnotes on Streamlit
 Other possible similarity scores:
 For some reasons are giving back the same numbers...
 ```python         
