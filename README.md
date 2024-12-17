@@ -11,7 +11,9 @@ The trick here is to take a threshold in the cosine similarity: whatever is belo
 - extract the `.zip` file in the sub-folder `llama.cpp` (if you cloned the repo you will already find it there)
 - Download your GGUF files (LLM or embeddings)in the sub-folder `llama.cpp\models` (if you cloned the repo you will already find it there)
 
-> for my tests I used `e5-small-v2.Q8_0.gguf` as embeddings model
+> for my tests I used `e5-small-v2_fp16.gguf` as embeddings model
+>
+> you can download it from [here](https://huggingface.co/ChristianAzinn/e5-small-v2-gguf/resolve/main/e5-small-v2_fp16.gguf)
 
 ##### OpenAI API specifications
 Check them [HERE](https://platform.openai.com/docs/api-reference/embeddings/object)
@@ -31,9 +33,12 @@ pip install openai streamlit tiktoken sentence-transformers pillow
 
 
 ## with Streamlit
-create a batch file with the following lines (something like `runservers.bat`
+create a batch file with the following lines (something like `runservers.bat`)
+
+In my case the models are in the subdirectory `D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model`
+
 ```
-start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\gte-small_fp16.gguf -c 1024 --port 8002
+start .\llama.cpp\llama-server.exe --embeddings -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\e5-small-v2_fp16.gguf -c 1024 --port 8002
 start .\llama.cpp\llama-server.exe -m D:\PortableLLMs\2024.TinyVicuna1B\llama.cpp\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
 PAUSE
 ```
@@ -84,13 +89,14 @@ def embed_QUERY(question,context,client):
                             encoding_format="float"
                          )
     hits = pytorch_cos_sim(embedded.data[0].embedding, embedded.data[1].embedding)
-    return hits
+    simscore = float(hits[0][0])
+    return simscore
 ```
 The function compute first  a list with two embedded documents, and then calculate the cosine similarity
 
 the retrned value is a tensor type so later we need to extract it
 ```python
-results.markdown(f'Similarity score: **{res[0][0]:.5f}**')
+results.markdown(f'Similarity score: **{res:.5f}**')
 ```
 
 
@@ -102,13 +108,13 @@ For some reasons are giving back the same numbers...
 from sentence_transformers.util import pytorch_cos_sim, cos_sim, dot_score
 print('1 > pytorch_cos_sim...')
 hits = pytorch_cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
+print(float(hits[0][0]))
 print('2 > cos_sim...')
 hits = cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
+print(float(hits[0][0]))
 print('3 > dot_score...')
 hits = dot_score(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
+print(float(hits[0][0]))
 ```
                         
 #### Additional notes
@@ -136,56 +142,62 @@ From the main project directory
 - in another terminal window run
 ```python
 from openai import OpenAI
+from sentence_transformers.util import pytorch_cos_sim
 import sys
 
-client = OpenAI(base_url="http://localhost:8002/v1", api_key="not-needed")
-print("Create embeddings for 2 different texts and than compute similarity serach")
-#start a while loop here
-userinput1 = ""
-userinput2 = ""
-print("\033[1;30m")  #dark grey
-print("Enter your first text (end input with Ctrl+D on Unix or Ctrl+Z on Windows) - type quit! to exit the chatroom:")
-print("\033[91;1m")  #red
-lines = sys.stdin.readlines()
-for line in lines:
-    userinput1 += line + "\n"
-if "quit!" in lines[0].lower():
-    print("\033[0mBYE BYE!")
-    #break #for the while loop if exists
-print("\033[1;30m")  #dark grey
-print("Enter your second text (end input with Ctrl+D on Unix or Ctrl+Z on Windows) - type quit! to exit the chatroom:")
-print("\033[91;1m")  #red
-lines2 = sys.stdin.readlines()
-for line in lines2:
-    userinput2 += line + "\n"
-if "quit!" in lines2[0].lower():
-    print("\033[0mBYE BYE!")
-    #break #for the while loop if exists
-print("Calling API endpoint for the 2 embeddings...")
-message1_em = client.embeddings.create(
-                         model="",
-                         input=userinput1,
-                         encoding_format="float"
-                         )
-message2_em = client.embeddings.create(
-                         model="",
-                         input=userinput2,
-                         encoding_format="float"
-                         )
-print('---')
-print('Computing similarity...')
+# instance for API call to the embeddings endpoint
+embeddings = OpenAI(base_url="http://localhost:8002/v1", api_key="not-needed")
+THRESHOLD = 0.7760
 
-# compute similarity (3 methods)
-from sentence_transformers.util import pytorch_cos_sim, cos_sim, dot_score
-print('1 > pytorch_cos_sim...')
-hits = pytorch_cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
-print('2 > cos_sim...')
-hits = cos_sim(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
-print('3 > dot_score...')
-hits = dot_score(message1_em.data[0].embedding, message2_em.data[0].embedding)
-print(hits)
+def embed_QUERY(question,context,client):
+    print("Create embeddings for 2 different texts and than compute similarity serach")
+    print("Calling API endpoint for the 2 embeddings...")
+    messages = [question,context]
+    embedded = client.embeddings.create(
+                            model="",
+                            input=messages,
+                            encoding_format="float"
+                         )
+    hits = pytorch_cos_sim(embedded.data[0].embedding, embedded.data[1].embedding)
+    simscore = float(hits[0][0])
+    return simscore
+
+while True:
+    #start a while loop here
+    userinput1 = ""
+    userinput2 = ""
+    print("\033[1;30m")  #dark grey
+    print("Enter your first text (end input with Ctrl+D on Unix or Ctrl+Z on Windows) - type quit! to exit the chatroom:")
+    print("\033[0m")  #reset all colors
+    lines = sys.stdin.readlines()
+    for line in lines:
+        userinput1 += line + "\n"
+    if "quit!" in lines[0].lower():
+        print("\033[0mBYE BYE!")
+        break #for the while loop if exists
+    print("\033[1;30m")  #dark grey
+    print("Enter your second text (end input with Ctrl+D on Unix or Ctrl+Z on Windows) - type quit! to exit the chatroom:")
+    print("\033[0m")  #reset all colors
+    lines2 = sys.stdin.readlines()
+    for line in lines2:
+        userinput2 += line + "\n"
+    if "quit!" in lines2[0].lower():
+        print("\033[0mBYE BYE!")
+        break #for the while loop if exists
+
+    print('---')
+    print("Calling API endpoint for embeddings and Computing similarity...")
+    relevance = embed_QUERY(userinput1,userinput2,embeddings)
+    print('')
+    if relevance >= THRESHOLD:
+        print("\033[92;1m")  #green
+        print(f'Relevance score = {relevance:.5f}\ncalling the Small Language Model for inference...')
+        print("\033[0m")  #reset all colors
+    else:
+        print("\033[91;1m")  #red    
+        print(f'UNANSWERABLE! \nRelevance score only {relevance:.5f}')
+        print("\033[0m")  #reset all colors
+    print('---')
 
 # a good threshold above 0.77  AnneFrank scores with China text 0.7258
 # pollution question scores 0.7822  China and India scores 0.7980
